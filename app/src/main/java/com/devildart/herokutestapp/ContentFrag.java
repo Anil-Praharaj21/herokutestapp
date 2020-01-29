@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -18,8 +19,13 @@ import android.widget.TextView;
 import com.devildart.herokutestapp.R;
 import com.devildart.herokutestapp.pojo.Criterium;
 import com.devildart.herokutestapp.pojo.TestDatum;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class ContentFrag {
@@ -74,36 +80,61 @@ public class ContentFrag {
         LinearLayout.LayoutParams params = new LinearLayout
                 .LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         SpannableString ss = new SpannableString(str);
-        for (int i = 1; i <= 5; i++) {
-            final int finalI = i;
-            ClickableSpan clickableSpan = new ClickableSpan() {
-                @Override
-                public void onClick(View textView) {
-                    switch (finalI) {
-                        case 1:
-                            createVarList(object.getCriteria().get(index).getVariable().get$1().getValues());
-                            break;
+        try {
+            Gson gson = new Gson();
+            final JSONObject var = new JSONObject(gson.toJson(object.getCriteria().get(index).getVariable()));
+            Iterator<String> keysItr = var.keys();
+            String key;
+            while (keysItr.hasNext()) {
+                key = keysItr.next();
+                final String finalKey = key;
 
-                        case 2:
-                            createVarList(object.getCriteria().get(index).getVariable().get$2().getValues());
-                            break;
+                ClickableSpan clickableSpan = new ClickableSpan() {
+                    @Override
+                    public void onClick(View textView) {
+                        /*switch (finalI) {
+                            case 1:
 
-                        case 3:
-                            createVarFloatList(object.getCriteria().get(index).getVariable().get$3().getValues());
-                            break;
+                            case 2:
+                                if (object.getCriteria().get(index).getVariable().get$2().getType().equals("value"))
+                                    createVarList(object.getCriteria().get(index).getVariable().get$2().getValues());
+                                break;
 
+                            case 3:
+                                if (object.getCriteria().get(index).getVariable().get$3().getType().equals("value"))
+                                    createVarFloatList(object.getCriteria().get(index).getVariable().get$3().getValues());
+                                break;
+
+                            case 4:
+                                if (object.getCriteria().get(index).getVariable().get$4().getType().equals("indicator"))
+                                    createVarEdit(object.getName(), object.getCriteria().get(index).getVariable().get$4().getParameterName(), object.getCriteria().get(index).getVariable().get$4().getDefaultValue() + "");
+                        }*/
+                        try {
+                            if (var.getJSONObject(finalKey).getString("type").equals("value")) {
+                                List<Integer> list = new ArrayList<>();
+                                for (int i = 0; i < var.getJSONObject(finalKey).getJSONArray("values").length(); i++) {
+                                    list.add(var.getJSONObject(finalKey).getJSONArray("values").getInt(i));
+                                }
+                                createVarList(list);
+                            } else if (var.getJSONObject(finalKey).getString("type").equals("indicator"))
+                                createVarEdit(object.getName(), var.getJSONObject(finalKey).getString("parameter_name"), var.getJSONObject(finalKey).getString("default_value"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
-            };
-            if (str.contains("$"+i))
-                ss.setSpan(clickableSpan, str.indexOf("$"+i), str.indexOf("$"+i) + 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                };
+                if (str.contains(key))
+                    ss.setSpan(clickableSpan, str.indexOf(key), str.indexOf(key) + 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            text.setLayoutParams(params);
+            text.setText(ss);
+            text.setTextSize(18f);
+            text.setTextColor(Color.WHITE);
+            text.setMovementMethod(LinkMovementMethod.getInstance());
+            parent.addView(text);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        text.setLayoutParams(params);
-        text.setText(ss);
-        text.setTextSize(18f);
-        text.setTextColor(Color.WHITE);
-        text.setMovementMethod(LinkMovementMethod.getInstance());
-        parent.addView(text);
     }
 
     private void createVarList(List<Integer> list) {
@@ -136,5 +167,14 @@ public class ContentFrag {
                 layout.addView(view);
             }
         }
+    }
+
+    private void createVarEdit(String title, String text, String def) {
+        parent.removeAllViews();
+        View view = LayoutInflater.from(context).inflate(R.layout.variable_edit, parent, false);
+        ((TextView) view.findViewById(R.id.title_template)).setText(title);
+        ((TextView) view.findViewById(R.id.parameter_name)).setText(text);
+        ((EditText) view.findViewById(R.id.value)).setText(def);
+        parent.addView(view);
     }
 }
