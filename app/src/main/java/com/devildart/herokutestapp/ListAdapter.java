@@ -10,17 +10,19 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.devildart.herokutestapp.pojo.TestDatum;
+
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder> {
 
-    private ArrayList<JSONObject> data;
+    private ArrayList<TestDatum> data;
     private Context context;
     private OnItemClickListener clickListener;
 
-    public ListAdapter(ArrayList<JSONObject> data, Context context, OnItemClickListener clickListener) {
+    public ListAdapter(ArrayList<TestDatum> data, Context context, OnItemClickListener clickListener) {
         this.data = data;
         this.context = context;
         this.clickListener = clickListener;
@@ -36,24 +38,20 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
     @Override
     public void onBindViewHolder(@NonNull ListViewHolder holder, int position) {
         try {
-            final JSONObject object = data.get(position);
-            if (object.has("name")) {
-                holder.title.setText(object.getString("name"));
-            }
-            if (object.has("tag") && object.has("color")) {
-                holder.subText.setText(object.getString("tag"));
-                switch (object.getString("color")) {
-                    case "green":
-                        holder.subText.setTextColor(Color.GREEN);
-                        break;
+            final TestDatum object = data.get(position);
+            holder.title.setText(object.getName());
+            holder.subText.setText(object.getTag());
+            switch (object.getColor()) {
+                case "green":
+                    holder.subText.setTextColor(Color.GREEN);
+                    break;
 
-                    case "red":
-                        holder.subText.setTextColor(Color.RED);
-                        break;
+                case "red":
+                    holder.subText.setTextColor(Color.RED);
+                    break;
 
-                        default:
-                            holder.subText.setTextColor(Color.YELLOW);
-                }
+                default:
+                    holder.subText.setTextColor(Color.YELLOW);
             }
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -86,6 +84,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
     }
 
     interface OnItemClickListener {
-        void onClick(JSONObject object);
+        void onClick(TestDatum object);
     }
 }
