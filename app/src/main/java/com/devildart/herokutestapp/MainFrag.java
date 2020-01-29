@@ -1,12 +1,11 @@
 package com.devildart.herokutestapp;
 
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,6 +23,8 @@ public class MainFrag extends Fragment implements ListFrag.OnItemClickInFrag {
 
     private FrameLayout container;
     private ArrayList<TestDatum> listArray = new ArrayList<>();
+    private Boolean onList = true;
+    private Handler handler = new Handler();
 
     @Nullable
     @Override
@@ -50,6 +51,7 @@ public class MainFrag extends Fragment implements ListFrag.OnItemClickInFrag {
                     list = gson.fromJson(response, type);
                     listArray.addAll(list);
                     createList();
+                    onList = true;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -66,11 +68,23 @@ public class MainFrag extends Fragment implements ListFrag.OnItemClickInFrag {
     public void onClick(TestDatum obj) {
         removePre();
         new ContentFrag(getContext(), obj, container);
+        onList = false;
     }
 
     private void removePre() {
         if (container.getChildCount() > 0) {
             container.removeAllViews();
         }
+    }
+
+    public Boolean onBackPress() {
+        createList();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                onList = true;
+            }
+        }, 30);
+        return onList;
     }
 }

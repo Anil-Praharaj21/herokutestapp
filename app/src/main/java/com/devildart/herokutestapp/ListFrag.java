@@ -8,6 +8,8 @@ import android.widget.FrameLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.devildart.herokutestapp.ListAdapter;
+import com.devildart.herokutestapp.R;
 import com.devildart.herokutestapp.pojo.TestDatum;
 
 import java.util.ArrayList;

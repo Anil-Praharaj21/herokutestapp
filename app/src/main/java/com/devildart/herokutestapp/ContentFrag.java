@@ -9,6 +9,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.devildart.herokutestapp.R;
 import com.devildart.herokutestapp.pojo.Criterium;
 import com.devildart.herokutestapp.pojo.TestDatum;
 
