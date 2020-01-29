@@ -79,6 +79,12 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.OnIte
             }
             if (object.has("criteria")) {
                 JSONArray array = object.getJSONArray("criteria");
+                int childCount = ((LinearLayout) findViewById(R.id.details_layout)).getChildCount();
+                if (childCount > 2) {
+                    for (int i = 2; i < childCount; i++) {
+                        ((LinearLayout) findViewById(R.id.details_layout)).removeViewAt(2);
+                    }
+                }
                 for (int i = 0; i < array.length(); i++) {
                     if (array.getJSONObject(i).has("text"))
                         setCriteria(array.getJSONObject(i).getString("text"), (LinearLayout) findViewById(R.id.details_layout));
