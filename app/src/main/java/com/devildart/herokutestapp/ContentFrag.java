@@ -92,23 +92,6 @@ public class ContentFrag {
                 ClickableSpan clickableSpan = new ClickableSpan() {
                     @Override
                     public void onClick(View textView) {
-                        /*switch (finalI) {
-                            case 1:
-
-                            case 2:
-                                if (object.getCriteria().get(index).getVariable().get$2().getType().equals("value"))
-                                    createVarList(object.getCriteria().get(index).getVariable().get$2().getValues());
-                                break;
-
-                            case 3:
-                                if (object.getCriteria().get(index).getVariable().get$3().getType().equals("value"))
-                                    createVarFloatList(object.getCriteria().get(index).getVariable().get$3().getValues());
-                                break;
-
-                            case 4:
-                                if (object.getCriteria().get(index).getVariable().get$4().getType().equals("indicator"))
-                                    createVarEdit(object.getName(), object.getCriteria().get(index).getVariable().get$4().getParameterName(), object.getCriteria().get(index).getVariable().get$4().getDefaultValue() + "");
-                        }*/
                         try {
                             if (var.getJSONObject(finalKey).getString("type").equals("value")) {
                                 List<Integer> list = new ArrayList<>();
