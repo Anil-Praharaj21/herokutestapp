@@ -2,6 +2,12 @@ package com.devildart.herokutestapp;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,7 +61,7 @@ public class ContentFrag {
                 }
             }
             for (int i = 0; i < array.size(); i++) {
-                setCriteria(array.get(i).getText(), (LinearLayout) view.findViewById(R.id.details_layout));
+                setCriteria(array.get(i).getText(), (LinearLayout) view.findViewById(R.id.details_layout), i);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -63,14 +69,72 @@ public class ContentFrag {
         parent.addView(view);
     }
 
-    private void setCriteria(String str, LinearLayout parent) {
+    private void setCriteria(String str, LinearLayout parent, final int index) {
         TextView text = new TextView(context);
         LinearLayout.LayoutParams params = new LinearLayout
                 .LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        SpannableString ss = new SpannableString(str);
+        for (int i = 1; i <= 5; i++) {
+            final int finalI = i;
+            ClickableSpan clickableSpan = new ClickableSpan() {
+                @Override
+                public void onClick(View textView) {
+                    switch (finalI) {
+                        case 1:
+                            createVarList(object.getCriteria().get(index).getVariable().get$1().getValues());
+                            break;
+
+                        case 2:
+                            createVarList(object.getCriteria().get(index).getVariable().get$2().getValues());
+                            break;
+
+                        case 3:
+                            createVarFloatList(object.getCriteria().get(index).getVariable().get$3().getValues());
+                            break;
+
+                    }
+                }
+            };
+            if (str.contains("$"+i))
+                ss.setSpan(clickableSpan, str.indexOf("$"+i), str.indexOf("$"+i) + 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
         text.setLayoutParams(params);
-        text.setText(str);
+        text.setText(ss);
         text.setTextSize(18f);
         text.setTextColor(Color.WHITE);
+        text.setMovementMethod(LinkMovementMethod.getInstance());
         parent.addView(text);
+    }
+
+    private void createVarList(List<Integer> list) {
+        if (list != null) {
+            parent.removeAllViews();
+            LinearLayout layout = new LinearLayout(context);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            layout.setOrientation(LinearLayout.VERTICAL);
+            layout.setLayoutParams(params);
+            parent.addView(layout);
+            for (int i = 0; i < list.size(); i++) {
+                View view = LayoutInflater.from(context).inflate(R.layout.variable_value, parent, false);
+                ((TextView) view.findViewById(R.id.var_text)).setText(list.get(i) + "");
+                layout.addView(view);
+            }
+        }
+    }
+
+    private void createVarFloatList(List<Float> list) {
+        if (list != null) {
+            parent.removeAllViews();
+            LinearLayout layout = new LinearLayout(context);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            layout.setOrientation(LinearLayout.VERTICAL);
+            layout.setLayoutParams(params);
+            parent.addView(layout);
+            for (int i = 0; i < list.size(); i++) {
+                View view = LayoutInflater.from(context).inflate(R.layout.variable_value, parent, false);
+                ((TextView) view.findViewById(R.id.var_text)).setText(list.get(i) + "");
+                layout.addView(view);
+            }
+        }
     }
 }
