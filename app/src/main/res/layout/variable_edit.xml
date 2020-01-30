@@ -30,15 +30,19 @@
 
         <TextView
             android:id="@+id/parameter_name"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="@android:color/black" />
+            android:textColor="@android:color/black"
+            android:layout_weight="1"/>
 
         <EditText
             android:id="@+id/value"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:background="@drawable/black_box"
+            android:layout_weight="1"/>
 
     </LinearLayout>
 

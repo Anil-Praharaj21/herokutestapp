@@ -30,6 +30,8 @@ public class ContentFrag {
     private Context context;
     private TestDatum object;
     private FrameLayout parent;
+    private String selected = null;
+    private String privous = null;
 
     public ContentFrag(Context context, TestDatum object, FrameLayout parent) {
         this.context = context;
@@ -73,6 +75,7 @@ public class ContentFrag {
     }
 
     private void setCriteria(String str, LinearLayout parent, final int index) {
+        String oldStr = str;
         TextView text = new TextView(context);
         LinearLayout.LayoutParams params = new LinearLayout
                 .LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -83,6 +86,9 @@ public class ContentFrag {
                 final JSONObject var = new JSONObject(gson.toJson(object.getCriteria().get(index).getVariable()));
                 Iterator<String> keysItr = var.keys();
                 String key;
+                ArrayList<Integer> start = new ArrayList<>();
+                ArrayList<Integer> length = new ArrayList<>();
+                ArrayList<ClickableSpan> clickableSpanList = new ArrayList<>();
                 while (keysItr.hasNext()) {
                     key = keysItr.next();
                     final String finalKey = key;
@@ -91,6 +97,7 @@ public class ContentFrag {
                         @Override
                         public void onClick(View textView) {
                             try {
+                                privous = ((TextView) textView).getText().toString();
                                 if (var.getJSONObject(finalKey).getString("type").equals("value")) {
                                     List<Integer> list = new ArrayList<>();
                                     for (int i = 0; i < var.getJSONObject(finalKey).getJSONArray("values").length(); i++) {
@@ -104,8 +111,22 @@ public class ContentFrag {
                             }
                         }
                     };
-                    if (str.contains(key))
-                        ss.setSpan(clickableSpan, str.indexOf(key), str.indexOf(key) + 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    if (str.contains(key)) {
+                        if (var.getJSONObject(finalKey).getString("type").equals("value")) {
+                            str = str.replace(key, "(" + var.getJSONObject(finalKey).getJSONArray("values").getString(0) + ")");
+                            start.add(str.indexOf("(" + var.getJSONObject(finalKey).getJSONArray("values").getString(0) + ")"));
+                            length.add(("(" + var.getJSONObject(finalKey).getJSONArray("values").getString(0) + ")").length());
+                        } else if (var.getJSONObject(finalKey).getString("type").equals("indicator")) {
+                            str = str.replace(key, "(" + var.getJSONObject(finalKey).getString("default_value") + ")");
+                            start.add(str.indexOf("(" + var.getJSONObject(finalKey).getString("default_value") + ")"));
+                            length.add(("(" + var.getJSONObject(finalKey).getString("default_value") + ")").length());
+                        }
+                    }
+                    clickableSpanList.add(clickableSpan);
+                }
+                ss = new SpannableString(str);
+                for (int i = 0; i < start.size(); i++) {
+                    ss.setSpan(clickableSpanList.get(i), start.get(i), start.get(i) + length.get(i), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
             }
             text.setLayoutParams(params);
@@ -128,8 +149,16 @@ public class ContentFrag {
             layout.setLayoutParams(params);
             parent.addView(layout);
             for (int i = 0; i < list.size(); i++) {
-                View view = LayoutInflater.from(context).inflate(R.layout.variable_value, parent, false);
+                final View view = LayoutInflater.from(context).inflate(R.layout.variable_value, parent, false);
                 ((TextView) view.findViewById(R.id.var_text)).setText(list.get(i) + "");
+                view.findViewById(R.id.var_text).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        selected = ((TextView) view.findViewById(R.id.var_text)).getText().toString();
+                        parent.removeAllViews();
+                        init();
+                    }
+                });
                 layout.addView(view);
             }
         }
