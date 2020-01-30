@@ -2,12 +2,10 @@ package com.devildart.herokutestapp;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +14,6 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.devildart.herokutestapp.R;
 import com.devildart.herokutestapp.pojo.Criterium;
 import com.devildart.herokutestapp.pojo.TestDatum;
 import com.google.gson.Gson;
@@ -82,32 +79,34 @@ public class ContentFrag {
         SpannableString ss = new SpannableString(str);
         try {
             Gson gson = new Gson();
-            final JSONObject var = new JSONObject(gson.toJson(object.getCriteria().get(index).getVariable()));
-            Iterator<String> keysItr = var.keys();
-            String key;
-            while (keysItr.hasNext()) {
-                key = keysItr.next();
-                final String finalKey = key;
+            if (object.getCriteria().get(index).getVariable() != null) {
+                final JSONObject var = new JSONObject(gson.toJson(object.getCriteria().get(index).getVariable()));
+                Iterator<String> keysItr = var.keys();
+                String key;
+                while (keysItr.hasNext()) {
+                    key = keysItr.next();
+                    final String finalKey = key;
 
-                ClickableSpan clickableSpan = new ClickableSpan() {
-                    @Override
-                    public void onClick(View textView) {
-                        try {
-                            if (var.getJSONObject(finalKey).getString("type").equals("value")) {
-                                List<Integer> list = new ArrayList<>();
-                                for (int i = 0; i < var.getJSONObject(finalKey).getJSONArray("values").length(); i++) {
-                                    list.add(var.getJSONObject(finalKey).getJSONArray("values").getInt(i));
-                                }
-                                createVarList(list);
-                            } else if (var.getJSONObject(finalKey).getString("type").equals("indicator"))
-                                createVarEdit(object.getName(), var.getJSONObject(finalKey).getString("parameter_name"), var.getJSONObject(finalKey).getString("default_value"));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                    ClickableSpan clickableSpan = new ClickableSpan() {
+                        @Override
+                        public void onClick(View textView) {
+                            try {
+                                if (var.getJSONObject(finalKey).getString("type").equals("value")) {
+                                    List<Integer> list = new ArrayList<>();
+                                    for (int i = 0; i < var.getJSONObject(finalKey).getJSONArray("values").length(); i++) {
+                                        list.add(var.getJSONObject(finalKey).getJSONArray("values").getInt(i));
+                                    }
+                                    createVarList(list);
+                                } else if (var.getJSONObject(finalKey).getString("type").equals("indicator"))
+                                    createVarEdit(object.getName(), var.getJSONObject(finalKey).getString("parameter_name"), var.getJSONObject(finalKey).getString("default_value"));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
-                };
-                if (str.contains(key))
-                    ss.setSpan(clickableSpan, str.indexOf(key), str.indexOf(key) + 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    };
+                    if (str.contains(key))
+                        ss.setSpan(clickableSpan, str.indexOf(key), str.indexOf(key) + 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
             }
             text.setLayoutParams(params);
             text.setText(ss);

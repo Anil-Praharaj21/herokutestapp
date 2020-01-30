@@ -1,5 +1,7 @@
 package com.devildart.herokutestapp;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -25,6 +27,7 @@ public class MainFrag extends Fragment implements ListFrag.OnItemClickInFrag {
     private ArrayList<TestDatum> listArray = new ArrayList<>();
     private Boolean onList = true;
     private Handler handler = new Handler();
+    private SharedPreferences preferences;
 
     @Nullable
     @Override
@@ -37,26 +40,41 @@ public class MainFrag extends Fragment implements ListFrag.OnItemClickInFrag {
         super.onViewCreated(view, savedInstanceState);
 
         container = view.findViewById(R.id.frag_container);
+        preferences = getContext().getSharedPreferences("test_data", Context.MODE_PRIVATE);
+
         callAPI();
     }
 
     private void callAPI() {
+        final String data = preferences.getString("data", null);
         new NetworkHandler(new NetworkHandler.Response() {
             @Override
             public void onSucces(String response) {
                 try {
-                    List<TestDatum> list;
-                    Gson gson = new Gson();
-                    Type type = new TypeToken<List<TestDatum>>() {}.getType();
-                    list = gson.fromJson(response, type);
-                    listArray.addAll(list);
-                    createList();
-                    onList = true;
+                    if (data == null || !data.equals(response)) {
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putString("data", response);
+                        editor.apply();
+                        populateData(response);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }).execute();
+        if (data != null) {
+            populateData(data   );
+        }
+    }
+
+    private void populateData(String response) {
+        List<TestDatum> list;
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<TestDatum>>() {}.getType();
+        list = gson.fromJson(response, type);
+        listArray.addAll(list);
+        createList();
+        onList = true;
     }
 
     private void createList() {
