@@ -51,7 +51,7 @@ public class MainFrag extends Fragment implements ListFrag.OnItemClickInFrag {
             @Override
             public void onSucces(String response) {
                 try {
-                    if (data == null || !data.equals(response)) {
+                    if (data == null) {
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putString("data", response);
                         editor.apply();
@@ -85,7 +85,7 @@ public class MainFrag extends Fragment implements ListFrag.OnItemClickInFrag {
     @Override
     public void onClick(TestDatum obj) {
         removePre();
-        new ContentFrag(getContext(), obj, container);
+        new ContentFrag(getContext(), obj, container, listArray);
         onList = false;
     }
 

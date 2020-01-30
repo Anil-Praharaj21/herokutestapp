@@ -1,6 +1,7 @@
 package com.devildart.herokutestapp;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -31,12 +32,14 @@ public class ContentFrag {
     private TestDatum object;
     private FrameLayout parent;
     private String selected = null;
-    private String privous = null;
+    private String previous = null;
+    private ArrayList<TestDatum> list;
 
-    public ContentFrag(Context context, TestDatum object, FrameLayout parent) {
+    public ContentFrag(Context context, TestDatum object, FrameLayout parent, ArrayList<TestDatum> list) {
         this.context = context;
         this.object = object;
         this.parent = parent;
+        this.list = list;
         init();
     }
 
@@ -75,7 +78,6 @@ public class ContentFrag {
     }
 
     private void setCriteria(String str, LinearLayout parent, final int index) {
-        String oldStr = str;
         TextView text = new TextView(context);
         LinearLayout.LayoutParams params = new LinearLayout
                 .LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -97,12 +99,12 @@ public class ContentFrag {
                         @Override
                         public void onClick(View textView) {
                             try {
-                                privous = ((TextView) textView).getText().toString();
                                 if (var.getJSONObject(finalKey).getString("type").equals("value")) {
                                     List<Integer> list = new ArrayList<>();
                                     for (int i = 0; i < var.getJSONObject(finalKey).getJSONArray("values").length(); i++) {
                                         list.add(var.getJSONObject(finalKey).getJSONArray("values").getInt(i));
                                     }
+                                    previous = list.get(0) +"";
                                     createVarList(list);
                                 } else if (var.getJSONObject(finalKey).getString("type").equals("indicator"))
                                     createVarEdit(object.getName(), var.getJSONObject(finalKey).getString("parameter_name"), var.getJSONObject(finalKey).getString("default_value"));
@@ -111,11 +113,28 @@ public class ContentFrag {
                             }
                         }
                     };
-                    if (str.contains(key)) {
+                    boolean strContains = false;
+                    String val = "";
+                    if (var.getJSONObject(finalKey).has("values")) {
+                        for (int i = 0; i < var.getJSONObject(finalKey).getJSONArray("values").length(); i++) {
+                            if (str.contains("(" + var.getJSONObject(finalKey).getJSONArray("values").getString(i) + ")")) {
+                                strContains = true;
+                                val = "(" + var.getJSONObject(finalKey).getJSONArray("values").getString(i) + ")";
+                            }
+                        }
+                    } else if (var.getJSONObject(finalKey).getString("type").equals("indicator")) {
+                        strContains = true;
+                    }
+                    if (str.contains(key) || strContains) {
                         if (var.getJSONObject(finalKey).getString("type").equals("value")) {
                             str = str.replace(key, "(" + var.getJSONObject(finalKey).getJSONArray("values").getString(0) + ")");
-                            start.add(str.indexOf("(" + var.getJSONObject(finalKey).getJSONArray("values").getString(0) + ")"));
-                            length.add(("(" + var.getJSONObject(finalKey).getJSONArray("values").getString(0) + ")").length());
+                            if (strContains) {
+                                start.add(str.indexOf(val));
+                                length.add(val.length());
+                            } else {
+                                start.add(str.indexOf("(" + var.getJSONObject(finalKey).getJSONArray("values").getString(0) + ")"));
+                                length.add(("(" + var.getJSONObject(finalKey).getJSONArray("values").getString(0) + ")").length());
+                            }
                         } else if (var.getJSONObject(finalKey).getString("type").equals("indicator")) {
                             str = str.replace(key, "(" + var.getJSONObject(finalKey).getString("default_value") + ")");
                             start.add(str.indexOf("(" + var.getJSONObject(finalKey).getString("default_value") + ")"));
@@ -123,6 +142,14 @@ public class ContentFrag {
                         }
                     }
                     clickableSpanList.add(clickableSpan);
+                }
+                if (previous != null && selected != null) {
+                    str = str.replace(previous, selected);
+                    list.get(object.getId() - 1).getCriteria().get(index).setText(str);
+                    SharedPreferences.Editor editor = context.getSharedPreferences("test_data", Context.MODE_PRIVATE).edit();
+                    String response = gson.toJson(list);
+                    editor.putString("data", response);
+                    editor.apply();
                 }
                 ss = new SpannableString(str);
                 for (int i = 0; i < start.size(); i++) {
